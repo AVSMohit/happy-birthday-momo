@@ -8,3 +8,802 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,600&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+
+<style>
+/* ── TOKENS ── */
+:root {
+  --bg:           #fdf5f0;
+  --surface:      #fff9f6;
+  --surface2:     #ffffff;
+  --surface3:     #fef1ec;
+  --text:         #2a1a14;
+  --text-muted:   #7a5c52;
+  --text-faint:   #c4a99f;
+  --border:       rgba(180,100,70,0.13);
+  --rose:         #c0485a;
+  --rose-dark:    #9b3247;
+  --rose-light:   #f9e8eb;
+  --gold:         #c9903a;
+  --cream:        #fdf5f0;
+  --shadow-sm:    0 2px 8px rgba(160,60,40,0.08);
+  --shadow-md:    0 6px 24px rgba(160,60,40,0.12);
+  --shadow-lg:    0 16px 48px rgba(160,60,40,0.16);
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px;
+  --font-display: 'Cormorant Garamond', Georgia, serif;
+  --font-body:    'Satoshi', 'Lato', sans-serif;
+  --ease-out: cubic-bezier(0.16,1,0.3,1);
+}
+[data-theme="dark"] {
+  --bg:           #1a1210;
+  --surface:      #211816;
+  --surface2:     #27201e;
+  --surface3:     #1e1614;
+  --text:         #f0e0d8;
+  --text-muted:   #a08070;
+  --text-faint:   #6a5048;
+  --border:       rgba(255,180,140,0.10);
+  --rose:         #e07080;
+  --rose-dark:    #c85060;
+  --rose-light:   rgba(200,80,96,0.15);
+  --gold:         #e0a855;
+  --shadow-sm:    0 2px 8px rgba(0,0,0,0.25);
+  --shadow-md:    0 6px 24px rgba(0,0,0,0.35);
+  --shadow-lg:    0 16px 48px rgba(0,0,0,0.45);
+}
+
+/* ── RESET & BASE ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: none; }
+body {
+  font-family: var(--font-body); font-size: 16px;
+  background: var(--bg); color: var(--text);
+  min-height: 100dvh; -webkit-font-smoothing: antialiased;
+  overflow-x: hidden; line-height: 1.6;
+}
+button { cursor: pointer; font: inherit; border: none; background: none; }
+::selection { background: rgba(192,72,90,0.18); }
+
+/* ── THEME TOGGLE ── */
+.theme-toggle {
+  position: fixed; top: 16px; right: 16px; z-index: 50;
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--surface2); box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-muted); font-size: 16px;
+  transition: all 250ms var(--ease-out);
+}
+.theme-toggle:hover { box-shadow: var(--shadow-md); transform: scale(1.08); }
+
+/* ── HERO / LETTER SECTION ── */
+.hero {
+  position: relative; overflow: hidden;
+  padding: 64px 20px 0;
+  background: linear-gradient(160deg, #fff5f8 0%, var(--bg) 60%);
+  text-align: center;
+}
+[data-theme="dark"] .hero {
+  background: linear-gradient(160deg, #2a1820 0%, var(--bg) 60%);
+}
+
+/* Floating petals canvas */
+#petal-canvas {
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  opacity: 0.55;
+}
+
+.hero-inner { position: relative; z-index: 1; }
+
+/* SVG heart logo */
+.hero-logo {
+  width: 56px; height: 56px; margin: 0 auto 16px;
+  animation: pulse-heart 2.8s ease-in-out infinite;
+}
+@keyframes pulse-heart {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+
+.hero-eyebrow {
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--rose); margin-bottom: 12px;
+  opacity: 0.75;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(38px, 9vw, 64px); font-weight: 600;
+  color: var(--text); line-height: 1.1; margin-bottom: 8px;
+  font-style: italic;
+}
+.hero-title span { color: var(--rose); }
+
+/* ── LETTER ── */
+.letter-wrap {
+  position: relative; margin: 32px auto 0; max-width: 400px;
+}
+
+/* Torn paper top edge */
+.letter-tear-top {
+  width: 100%; height: 18px; position: relative; overflow: hidden;
+  margin-bottom: -2px; z-index: 2;
+}
+.letter-tear-top svg { width: 100%; height: 18px; display: block; }
+
+.letter {
+  background: var(--surface2);
+  padding: 24px 24px 28px;
+  position: relative; z-index: 1;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+}
+[data-theme="dark"] .letter { background: var(--surface2); }
+
+.letter-tear-bottom {
+  width: 100%; height: 18px; position: relative; overflow: hidden;
+  margin-top: -2px; z-index: 2; transform: rotate(180deg);
+}
+.letter-tear-bottom svg { width: 100%; height: 18px; display: block; }
+
+.letter p {
+  font-family: var(--font-body); font-size: 14px; line-height: 1.75;
+  color: var(--text-muted); margin-bottom: 14px; text-align: left;
+  max-width: none;
+}
+.letter p:last-child { margin-bottom: 0; }
+.letter p em {
+  font-family: var(--font-display); font-style: italic;
+  font-size: 15px; color: var(--rose); font-weight: 600;
+}
+.letter-sign {
+  font-family: var(--font-display); font-size: 22px; font-style: italic;
+  color: var(--rose); margin-top: 18px; text-align: right;
+  display: block;
+}
+
+/* ── PROGRESS ── */
+.progress-section {
+  display: flex; align-items: center; justify-content: center;
+  gap: 28px; padding: 32px 20px 8px;
+  position: relative; z-index: 1;
+}
+.progress-ring-wrap {
+  position: relative; width: 80px; height: 80px;
+  flex-shrink: 0;
+}
+.progress-ring { transform: rotate(-90deg); }
+.progress-ring-bg { fill: none; stroke: var(--border); stroke-width: 5; }
+.progress-ring-fill {
+  fill: none; stroke: var(--rose); stroke-width: 5;
+  stroke-linecap: round;
+  stroke-dasharray: 219.9; stroke-dashoffset: 0;
+  transition: stroke-dashoffset 600ms var(--ease-out);
+}
+.progress-center {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.progress-num {
+  font-family: var(--font-display); font-size: 22px; font-weight: 600;
+  color: var(--rose); line-height: 1;
+}
+.progress-label { font-size: 9px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 1px; }
+.progress-stats { display: flex; flex-direction: column; gap: 6px; }
+.stat-row { display: flex; align-items: center; gap: 10px; }
+.stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.stat-text { font-size: 13px; color: var(--text-muted); }
+.stat-text strong { color: var(--text); font-weight: 700; }
+
+/* ── FILTER ── */
+.filter-bar {
+  display: flex; gap: 6px; overflow-x: auto; padding: 16px 16px 4px;
+  scrollbar-width: none; max-width: 680px; margin: 0 auto;
+}
+.filter-bar::-webkit-scrollbar { display: none; }
+.filter-btn {
+  flex-shrink: 0; font-family: var(--font-body);
+  font-size: 12px; font-weight: 700; padding: 7px 16px;
+  border-radius: 99px; border: 1.5px solid var(--border);
+  background: var(--surface2); color: var(--text-muted);
+  transition: all 220ms var(--ease-out); white-space: nowrap;
+  letter-spacing: 0.3px;
+}
+.filter-btn.active { background: var(--rose); color: #fff; border-color: var(--rose); }
+.filter-btn:hover:not(.active) { border-color: var(--rose); color: var(--rose); }
+
+/* ── GRID ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+  gap: 14px; padding: 16px 16px 24px;
+  max-width: 680px; margin: 0 auto;
+}
+
+/* ── CARD ── */
+.card-wrap {
+  perspective: 900px;
+  cursor: pointer;
+}
+.card-wrap.hidden { display: none; }
+
+/* Slight random tilt — "scattered on table" */
+.card-wrap:nth-child(3n+1) .card { --tilt: -1.2deg; }
+.card-wrap:nth-child(3n+2) .card { --tilt: 0.8deg; }
+.card-wrap:nth-child(3n)   .card { --tilt: -0.5deg; }
+
+.card {
+  position: relative; width: 100%; aspect-ratio: 2/3;
+  transform-style: preserve-3d;
+  transition: transform 0.6s var(--ease-out);
+  border-radius: var(--r-lg);
+  transform: rotate(var(--tilt, 0deg));
+}
+.card-wrap:hover .card {
+  transform: rotate(0deg) scale(1.03) translateY(-4px);
+  transition: transform 0.3s var(--ease-out);
+}
+.card-wrap.flipped .card {
+  transform: rotateY(180deg) rotate(0deg);
+}
+.card-wrap.redeemed .card {
+  transform: rotate(var(--tilt, 0deg));
+  opacity: 0.6; filter: grayscale(0.4) saturate(0.7);
+}
+.card-wrap.redeemed:hover .card {
+  transform: rotate(0deg) scale(1.02); opacity: 0.7;
+}
+
+.card-front, .card-back {
+  position: absolute; inset: 0;
+  backface-visibility: hidden; -webkit-backface-visibility: hidden;
+  border-radius: var(--r-lg); overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+/* FRONT — gradient + wax seal aesthetic */
+.card-front {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 20px 14px; gap: 8px;
+  position: relative;
+}
+
+/* Texture overlay */
+.card-front::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  border-radius: var(--r-lg); pointer-events: none;
+}
+
+/* Wax seal */
+.wax-seal {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(255,255,255,0.22);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; backdrop-filter: blur(2px);
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+.c-emoji { font-size: 38px; line-height: 1; position: relative; z-index: 1; }
+.c-title {
+  font-family: var(--font-display); font-size: 14px; font-weight: 600;
+  text-align: center; line-height: 1.25; color: white;
+  position: relative; z-index: 1;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.c-hint {
+  font-size: 9px; text-transform: uppercase; letter-spacing: 2px;
+  color: rgba(255,255,255,0.6); position: relative; z-index: 1; margin-top: 2px;
+}
+
+/* Redeemed stamp */
+.card-wrap.redeemed .card-front::after {
+  content: 'Used ✓';
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-display); font-size: 18px;
+  font-style: italic; font-weight: 600; letter-spacing: 2px;
+  color: rgba(255,255,255,0.9);
+  background: rgba(0,0,0,0.32);
+  border-radius: var(--r-lg); backdrop-filter: blur(2px);
+}
+
+/* BACK */
+.card-back {
+  transform: rotateY(180deg);
+  background: var(--surface2);
+  display: flex; flex-direction: column;
+  padding: 16px 14px;
+  border: 1px solid var(--border);
+}
+.b-accent-bar { height: 3px; border-radius: 2px; margin-bottom: 12px; background: linear-gradient(90deg, var(--accent-color), transparent); }
+.b-emoji { font-size: 20px; margin-bottom: 6px; }
+.b-title {
+  font-family: var(--font-display); font-size: 14px; font-weight: 600;
+  font-style: italic; line-height: 1.2; margin-bottom: 8px;
+}
+.b-desc {
+  font-family: var(--font-body); font-size: 10.5px; color: var(--text-muted);
+  line-height: 1.55; flex: 1;
+}
+.b-tnc {
+  font-size: 8px; color: var(--text-faint); font-style: italic;
+  line-height: 1.4; border-top: 1px dashed var(--border);
+  padding-top: 7px; margin-top: 8px;
+}
+.b-btn {
+  margin-top: 10px; width: 100%; padding: 9px;
+  font-family: var(--font-body); font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1px;
+  border-radius: 8px; border: none; cursor: pointer;
+  transition: all 220ms var(--ease-out); color: white;
+}
+.b-btn:hover { filter: brightness(1.08); transform: scale(0.98); }
+.b-btn:disabled { opacity: 0.4; cursor: default; transform: none; filter: none; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(20,10,8,0.6); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 300ms var(--ease-out);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface2); border-radius: 28px 28px 0 0;
+  padding: 0 0 40px; width: 100%; max-width: 480px;
+  transform: translateY(60px); transition: transform 400ms var(--ease-out);
+  overflow: hidden;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal-accent-bar { height: 5px; width: 100%; background: linear-gradient(90deg, var(--rose), var(--gold)); }
+.modal-inner { padding: 24px 24px 0; }
+.modal-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border); margin: 0 auto 20px; }
+.modal-emoji { font-size: 48px; margin-bottom: 12px; }
+.modal-title {
+  font-family: var(--font-display); font-size: 26px; font-weight: 600;
+  font-style: italic; margin-bottom: 10px; line-height: 1.15;
+}
+.modal-desc { font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 14px; }
+.modal-tnc {
+  font-size: 12px; color: var(--text-faint); font-style: italic; line-height: 1.5;
+  border-top: 1px dashed var(--border); padding: 14px 24px 0;
+  margin: 0 -24px; margin-bottom: 20px; padding-bottom: 14px;
+  border-bottom: 1px dashed var(--border);
+}
+.modal-actions { padding: 0 24px; display: flex; flex-direction: column; gap: 10px; }
+.modal-redeem-btn {
+  width: 100%; padding: 15px;
+  font-family: var(--font-body); font-size: 14px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 1.5px;
+  border-radius: 14px; border: none; color: white; cursor: pointer;
+  transition: all 250ms var(--ease-out);
+  background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+  box-shadow: 0 4px 16px rgba(192,72,90,0.3);
+}
+.modal-redeem-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(192,72,90,0.4); }
+.modal-redeem-btn:disabled { opacity: 0.4; cursor: default; transform: none; box-shadow: none; }
+.modal-wa-btn {
+  width: 100%; padding: 13px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 700;
+  border-radius: 14px; background: #25D366; color: white;
+  border: none; cursor: pointer; transition: all 220ms var(--ease-out);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.modal-wa-btn.hidden { display: none; }
+.modal-wa-btn:hover { background: #1fba58; }
+.modal-close {
+  width: 100%; padding: 12px;
+  font-family: var(--font-body); font-size: 13px; font-weight: 600;
+  background: none; border: 1.5px solid var(--border);
+  border-radius: 14px; color: var(--text-muted); cursor: pointer;
+  transition: all 220ms var(--ease-out);
+}
+.modal-close:hover { background: var(--surface3); }
+.redeemed-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(39,174,96,0.1); color: #27ae60;
+  border: 1px solid rgba(39,174,96,0.22); border-radius: 99px;
+  padding: 5px 14px; font-size: 12px; font-weight: 700;
+  margin-bottom: 14px;
+}
+
+/* ── CONFETTI / PETALS ── */
+.confetti-piece {
+  position: fixed; pointer-events: none; z-index: 300;
+  border-radius: 2px;
+  animation: confetti-fall 1.4s ease-in forwards;
+}
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+  100% { transform: translateY(400px) rotate(900deg) scale(0.2); opacity: 0; }
+}
+
+/* ── FOOTER ── */
+.footer {
+  text-align: center; padding: 24px 16px 52px;
+  font-family: var(--font-display); font-style: italic;
+  font-size: 16px; color: var(--text-faint);
+}
+.footer span { color: var(--rose); }
+
+@media (min-width: 480px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (min-width: 680px) {
+  .hero { padding: 80px 40px 0; }
+  .grid { padding: 20px 24px 32px; gap: 16px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- Theme toggle -->
+<button class="theme-toggle" data-theme-toggle aria-label="Toggle dark mode">☀️</button>
+
+<!-- Hero -->
+<div class="hero">
+  <canvas id="petal-canvas"></canvas>
+  <div class="hero-inner">
+    <!-- SVG Heart Logo -->
+    <svg class="hero-logo" viewBox="0 0 56 56" fill="none" aria-label="Heart logo">
+      <path d="M28 48s-22-14.4-22-26.4C6 13.6 12.4 8 20 8c4 0 7.6 1.8 10 4.6A13.1 13.1 0 0 1 40 8c7.6 0 14 5.6 14 13.6C54 33.6 28 48 28 48z" fill="#c0485a" fill-opacity="0.18"/>
+      <path d="M28 44S8 31.2 8 20.4C8 14.2 13.4 10 20 10c3.8 0 7.2 1.8 9.4 4.6.2.3.6.3.8 0A11.8 11.8 0 0 1 36 10c6.6 0 12 4.2 12 10.4C48 31.2 28 44 28 44z" fill="#c0485a" stroke="#c0485a" stroke-width="0.5"/>
+    </svg>
+    <p class="hero-eyebrow">Happy 27th Birthday 🎂</p>
+    <h1 class="hero-title">For <span>You</span>, Always</h1>
+  </div>
+
+  <!-- Letter -->
+  <div class="letter-wrap">
+    <div class="letter-tear-top">
+      <svg viewBox="0 0 400 18" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,18 Q20,4 40,12 Q60,20 80,8 Q100,0 120,14 Q140,20 160,6 Q180,0 200,12 Q220,18 240,5 Q260,0 280,14 Q300,20 320,7 Q340,0 360,13 Q380,18 400,8 L400,18 Z" fill="var(--surface2)"/>
+      </svg>
+    </div>
+    <div class="letter">
+      <p>Hi. It's me. The person who loves you a completely embarrassing amount.</p>
+      <p>I made you this because I love you. That's it. That's the whole reason.</p>
+      <p>Now — if some of these aren't exactly what you had in mind — first of all, I tried my best. Second of all, I'm open to feedback. Third of all, my love language is apparently <em>terms and conditions</em>, so bear with me.</p>
+      <p>Bear with me for the rest of your life? I promise I'll get better at this. Probably. The odds are decent. 🐻</p>
+      <span class="letter-sign">— Yours 💛</span>
+    </div>
+    <div class="letter-tear-bottom">
+      <svg viewBox="0 0 400 18" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,18 Q20,4 40,12 Q60,20 80,8 Q100,0 120,14 Q140,20 160,6 Q180,0 200,12 Q220,18 240,5 Q260,0 280,14 Q300,20 320,7 Q340,0 360,13 Q380,18 400,8 L400,18 Z" fill="var(--surface2)"/>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- Progress -->
+<div class="progress-section">
+  <div class="progress-ring-wrap">
+    <svg class="progress-ring" width="80" height="80" viewBox="0 0 80 80">
+      <circle class="progress-ring-bg" cx="40" cy="40" r="35"/>
+      <circle class="progress-ring-fill" id="ring-fill" cx="40" cy="40" r="35"/>
+    </svg>
+    <div class="progress-center">
+      <div class="progress-num" id="left-count">27</div>
+      <div class="progress-label">left</div>
+    </div>
+  </div>
+  <div class="progress-stats">
+    <div class="stat-row">
+      <div class="stat-dot" style="background:var(--rose)"></div>
+      <div class="stat-text"><strong id="redeemed-count">0</strong> redeemed</div>
+    </div>
+    <div class="stat-row">
+      <div class="stat-dot" style="background:var(--border);border:1px solid var(--text-faint)"></div>
+      <div class="stat-text"><strong>27</strong> total</div>
+    </div>
+    <div class="stat-row" style="margin-top:2px">
+      <div class="stat-dot" style="background:var(--gold)"></div>
+      <div class="stat-text" style="font-size:11px;color:var(--text-faint)">Valid all year 💛</div>
+    </div>
+  </div>
+</div>
+
+<!-- Try your luck -->
+<div style="text-align:center; padding: 8px 20px 4px;">
+  <button id="luck-btn" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 16px;font-family:var(--font-body);font-size:12px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;border-radius:999px;border:1.5px solid var(--border);background:var(--surface2);color:var(--rose);box-shadow:var(--shadow-sm);transition:all 220ms var(--ease-out);">
+    <span>✨</span><span>Try your luck</span>
+  </button>
+</div>
+
+<!-- Filter -->
+<div class="filter-bar">
+  <button class="filter-btn active" data-filter="all">All</button>
+  <button class="filter-btn" data-filter="available">Available</button>
+  <button class="filter-btn" data-filter="redeemed">Redeemed</button>
+</div>
+
+<!-- Grid -->
+<div class="grid" id="grid"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-accent-bar"></div>
+    <div class="modal-inner">
+      <div class="modal-handle"></div>
+      <div id="redeemed-badge-wrap"></div>
+      <div class="modal-emoji" id="modal-emoji"></div>
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-desc" id="modal-desc"></div>
+    </div>
+    <div class="modal-tnc" id="modal-tnc"></div>
+    <div class="modal-actions">
+      <button class="modal-redeem-btn" id="modal-redeem-btn">Redeem This Coupon</button>
+      <button class="modal-wa-btn hidden" id="modal-wa-btn">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Notify Baby Bear
+      </button>
+      <button class="modal-close" id="modal-close">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer">made with <span>♥</span>, every single bit of it</div>
+
+<script>
+const COUPONS = [
+  { emoji:'🍝', title:'Italian Night With You', description:'Redeem for a cozy Italian dinner planned by me — pasta, pizza, something sweet, and an evening focused only on you.', tnc:'T&C: I pick the playlist. You handle the compliments. 3-day cooldown between coupons.', accent:'#c0392b', bg:'#fff5f0' },
+  { emoji:'🍔', title:'Burger & Chicken Comfort Feast', description:'One proper comfort-food session — I arrange your favorite burger and chicken, and we eat together with no guilt and no rushing.', tnc:'T&C: Sharing is caring, but your plate is sacred. 3-day cooldown between coupons.', accent:'#e67e22', bg:'#fffbf0' },
+  { emoji:'🫧', title:'Pani Puri Adventure Date', description:'I take you out for pani puri to a place you choose — we eat, laugh, and walk around like two happy, slightly chaotic kids.', tnc:'T&C: Whoever finishes first owes the other a back rub. 3-day cooldown between coupons.', accent:'#27ae60', bg:'#f0fff4' },
+  { emoji:'🎾', title:'Chill Tennis Play Date', description:'We grab rackets and play a relaxed game of tennis — no serious scoring, just rallies, jokes, and time together.', tnc:'T&C: No mercy, no trash talk. Loser owes winner one long hug. 3-day cooldown between coupons.', accent:'#2980b9', bg:'#f0f9ff' },
+  { emoji:'📖', title:'Book Celebration Evening', description:'We spend an evening celebrating that your murder mystery is finished — talking about the journey, your favorite parts, and how insanely proud I am of you for writing a whole book.', tnc:'T&C: I\'ll gush about your book like a proud parent at a school play. 3-day cooldown between coupons.', accent:'#8e44ad', bg:'#fdf0ff' },
+  { emoji:'📝', title:'Line-By-Line Reaction Read', description:'You give me a chapter or section, I read it carefully and tell you my genuine reactions — what hit hard, what confused me, and what felt perfect.', tnc:'T&C: Honest reactions only. Gasping dramatically is encouraged. 3-day cooldown between coupons.', accent:'#6c3483', bg:'#f5f0ff' },
+  { emoji:'⏰', title:'One Hour Of Undivided Attention', description:'Sixty minutes where I\'m completely yours — no phone, no laptop, no other tasks — just you and whatever you want us to do.', tnc:'T&C: Phone goes face-down or it goes out the window. 3-day cooldown between coupons.', accent:'#c0392b', bg:'#fff0f5' },
+  { emoji:'📞', title:'Drop-Everything And Call', description:'When you really need me, you can redeem this and I will step away and call you as soon as possible, staying till you feel okay again.', tnc:'T&C: I will drop literally everything. Even if I\'m mid-sentence with someone else. 3-day cooldown between coupons.', accent:'#2471a3', bg:'#f0f5ff' },
+  { emoji:'📵', title:'Phone-Free Evening Together', description:'One evening where both of us keep our phones away and simply exist together — talking, eating, watching something, or just being.', tnc:'T&C: Staying up past 2am voids the no-complaints clause. 3-day cooldown between coupons.', accent:'#1a237e', bg:'#f0f0ff' },
+  { emoji:'☀️', title:'Slow Morning With You', description:'We spend a slow, calm morning together — in person or on call — easing into the day instead of rushing.', tnc:'T&C: No alarms. No rushing. Anyone who checks work email forfeits cuddles. 3-day cooldown between coupons.', accent:'#a04000', bg:'#fffaf0' },
+  { emoji:'🛟', title:'Bad Day Rescue Pack', description:'On a rough day, you can use this and I\'ll do my best to listen, comfort you, and arrange something small that makes you feel lighter.', tnc:'T&C: Whining is welcome. Suffering in silence is not. 3-day cooldown between coupons.', accent:'#e91e8c', bg:'#fff5f8' },
+  { emoji:'🫂', title:'Tell Me Everything Night', description:'An evening where you can vent about anything — life, work, friends — and my only job is to listen, understand, and support.', tnc:'T&C: I will not try to fix it unless you tell me to. I will just nod and look concerned. 3-day cooldown between coupons.', accent:'#1e8449', bg:'#f5fff8' },
+  { emoji:'🤫', title:'Quiet Company Coupon', description:'You can call this in when you don\'t want to talk much — I\'ll just be there — online or offline — keeping you company in silence.', tnc:'T&C: Comfortable silence is a love language and I\'m fluent. 3-day cooldown between coupons.', accent:'#5d6d7e', bg:'#f8f8ff' },
+  { emoji:'💍', title:'Paper Rings Level Day', description:'One day where I choose you over everything else — your plans, your food, your mood, and at least one romantic surprise.', tnc:'T&C: Crying to Taylor Swift is expected. Singing off-key is mandatory. 3-day cooldown between coupons.', accent:'#ad1457', bg:'#fff0f5' },
+  { emoji:'🌙', title:'Mini Forever Evening', description:'A simple but special evening — a walk, café, or call — that we treat as if it\'s our own small forever moment.', tnc:'T&C: No checking the time. If it feels like forever, that\'s the point. 3-day cooldown between coupons.', accent:'#c0392b', bg:'#fffff0' },
+  { emoji:'🔮', title:'Future Talk Without Panic', description:'We sit and calmly talk about our future — trips, plans, dreams — without rushing or joking away serious things.', tnc:'T&C: No deflecting with jokes when things get real. We\'re doing this. 3-day cooldown between coupons.', accent:'#00796b', bg:'#f0fffe' },
+  { emoji:'💌', title:'Love Letter From Me', description:'You get a proper, handwritten letter where I tell you why you matter to me and how I see you.', tnc:'T&C: Handwritten. No autocorrect. Every embarrassing word is intentional. 3-day cooldown between coupons.', accent:'#b71c1c', bg:'#fff5f5' },
+  { emoji:'🎯', title:'Intentions Day', description:'A day where I deliberately show up for you — being present, fixing small things, and reminding you you\'re my priority.', tnc:'T&C: I show up for real, not just on good days. Fine print: also on bad hair days. 3-day cooldown between coupons.', accent:'#1565c0', bg:'#f0f8ff' },
+  { emoji:'🌱', title:'One Thing I\'ll Improve', description:'You pick one habit or behavior of mine that bothers you — I put real effort into changing it over the next week.', tnc:'T&C: One habit. One week. No excuses. You\'re allowed to remind me. Repeatedly. 3-day cooldown between coupons.', accent:'#2e7d32', bg:'#f5fff0' },
+  { emoji:'🧸', title:'Reassurance On Demand', description:'Use this when you\'re overthinking us — I\'ll sit, listen, and answer honestly until you feel secure again.', tnc:'T&C: No "I\'m fine" allowed here. This is a judgment-free overthinking zone. 3-day cooldown between coupons.', accent:'#880e4f', bg:'#fff5fb' },
+  { emoji:'📷', title:'Memory-Making Date', description:'We plan one date with the goal of creating a new "remember when we..." story together.', tnc:'T&C: We\'re making a memory worth embarrassing ourselves over in 10 years. 3-day cooldown between coupons.', accent:'#f57f17', bg:'#fffde7' },
+  { emoji:'🤗', title:'Unlimited Cuddles, Zero Complaints', description:'Redeem this for a session of unlimited cuddles where I\'m not allowed to wriggle away, complain, or make it awkward — just pure, uninterrupted cuddle time on your terms.', tnc:'T&C: Zero complaints, zero wriggling away. I am legally obligated to be a willing cuddle victim. 3-day cooldown between coupons.', accent:'#e65100', bg:'#fff8f0' },
+  { emoji:'😜', title:'Certified Annoy-You Session', description:'A time slot where we\'re allowed to tease and annoy each other in a fun, childish way, with no real anger allowed.', tnc:'T&C: What happens in annoy-you session stays in annoy-you session. No retaliations after. 3-day cooldown between coupons.', accent:'#388e3c', bg:'#f3fff0' },
+  { emoji:'🎤', title:'Roast Your Boyfriend Coupon', description:'You get to roast me for my habits and quirks, and I\'m only allowed to reply with affection and playful comebacks.', tnc:'T&C: Roast freely. I will take it with grace. And absolutely zero dignity. 3-day cooldown between coupons.', accent:'#bf360c', bg:'#fff8f0' },
+  { emoji:'🏆', title:'Goal Buddy Session', description:'You pick one thing you want to work on — editing, fitness, learning — and we plan it together with me as your accountability buddy.', tnc:'T&C: I will not let you procrastinate. Lovingly. Aggressively. Both. 3-day cooldown between coupons.', accent:'#283593', bg:'#f0f4ff' },
+  { emoji:'🎉', title:'Celebrate Your Wins Coupon', description:'When you achieve something small or big, you can redeem this and I will celebrate it properly — calls, messages, maybe food, but definitely pride.', tnc:'T&C: Big or small, wins get celebrated like you just won a Grammy. 3-day cooldown between coupons.', accent:'#f9a825', bg:'#fffde7' },
+  { emoji:'🌟', title:'I\'m Proud Of You Evening', description:'We spend an evening talking about things you\'ve achieved or survived, and I tell you exactly why I\'m proud of you.', tnc:'T&C: You will sit here and accept being told how incredible you are. No deflecting. 3-day cooldown between coupons.', accent:'#ff8f00', bg:'#fff8e1' },
+];
+
+const WA_NUMBER = '917989862743';
+const CIRCUMFERENCE = 2 * Math.PI * 35; // 219.9
+
+// ── STATE via localStorage with URL hash fallback ──
+function loadState() {
+  try {
+    const stored = localStorage.getItem('momo_coupons_v1');
+    if (stored) {
+      const arr = JSON.parse(stored);
+      if (Array.isArray(arr) && arr.length === 27) return arr;
+    }
+  } catch(e) {}
+  // fallback: URL hash
+  try {
+    const hash = location.hash.replace('#r:', '');
+    if (!hash) return new Array(27).fill(false);
+    const indices = hash.split(',').map(Number).filter(n => !isNaN(n) && n >= 0 && n < 27);
+    const arr = new Array(27).fill(false);
+    indices.forEach(i => arr[i] = true);
+    return arr;
+  } catch(e) {
+    return new Array(27).fill(false);
+  }
+}
+
+function saveState(arr) {
+  // Save to localStorage
+  try { localStorage.setItem('momo_coupons_v1', JSON.stringify(arr)); } catch(e) {}
+  // Also encode in URL hash as backup
+  const idx = arr.map((v,i) => v ? i : -1).filter(i => i >= 0);
+  location.hash = idx.length ? 'r:' + idx.join(',') : '';
+}
+
+let redeemed = loadState();
+let activeFilter = 'all';
+let modalIndex = -1;
+
+// ── RENDER ──
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  COUPONS.forEach((c, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'card-wrap' + (redeemed[i] ? ' redeemed' : '');
+    if (activeFilter === 'available' && redeemed[i]) wrap.classList.add('hidden');
+    if (activeFilter === 'redeemed' && !redeemed[i]) wrap.classList.add('hidden');
+
+    const bg = `linear-gradient(145deg, ${c.accent}, ${darken(c.accent, 20)})`;
+    wrap.innerHTML = `
+      <div class="card">
+        <div class="card-front" style="background:${bg}">
+          <div class="wax-seal">💛</div>
+          <div class="c-emoji">${c.emoji}</div>
+          <div class="c-title">${c.title}</div>
+          <div class="c-hint">tap to open</div>
+        </div>
+        <div class="card-back" style="--accent-color:${c.accent}">
+          <div class="b-accent-bar" style="background:${c.accent}"></div>
+          <div class="b-emoji">${c.emoji}</div>
+          <div class="b-title" style="color:${c.accent}">${c.title}</div>
+          <div class="b-desc">${c.description}</div>
+          <div class="b-tnc">${c.tnc}</div>
+          <button class="b-btn" style="background:${c.accent}" ${redeemed[i]?'disabled':''}>${redeemed[i]?'Redeemed':'Redeem'}</button>
+        </div>
+      </div>`;
+
+    wrap.querySelector('.card-front').addEventListener('click', () => wrap.classList.toggle('flipped'));
+    wrap.querySelector('.card-back').addEventListener('click', e => {
+      if (!e.target.classList.contains('b-btn')) wrap.classList.remove('flipped');
+    });
+    wrap.querySelector('.b-btn').addEventListener('click', e => { e.stopPropagation(); openModal(i); });
+    grid.appendChild(wrap);
+  });
+  updateStats();
+}
+
+function darken(hex, amount) {
+  const r = Math.max(0, parseInt(hex.slice(1,3),16) - amount);
+  const g = Math.max(0, parseInt(hex.slice(3,5),16) - amount);
+  const b = Math.max(0, parseInt(hex.slice(5,7),16) - amount);
+  return '#' + r.toString(16).padStart(2,'0') + g.toString(16).padStart(2,'0') + b.toString(16).padStart(2,'0');
+}
+
+function openModal(i) {
+  modalIndex = i;
+  const c = COUPONS[i];
+  const isR = redeemed[i];
+  document.getElementById('redeemed-badge-wrap').innerHTML = isR ? '<div class="redeemed-badge">✓ Already Redeemed</div>' : '';
+  document.getElementById('modal-emoji').textContent = c.emoji;
+  const titleEl = document.getElementById('modal-title');
+  titleEl.textContent = c.title; titleEl.style.color = c.accent;
+  document.getElementById('modal-desc').textContent = c.description;
+  document.getElementById('modal-tnc').textContent = c.tnc;
+  const btn = document.getElementById('modal-redeem-btn');
+  btn.textContent = isR ? 'Already Redeemed ✓' : 'Redeem This Coupon';
+  btn.disabled = isR;
+  const waBtn = document.getElementById('modal-wa-btn');
+  waBtn.classList.toggle('hidden', !isR);
+  if (isR) setWaBtn(i);
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function setWaBtn(i) {
+  const c = COUPONS[i];
+  const msg = encodeURIComponent(`Hey! I'm redeeming my birthday coupon ${c.emoji} — ${c.title} — ready! 🎉`);
+  document.getElementById('modal-wa-btn').onclick = () => window.open(`https://wa.me/${WA_NUMBER}?text=${msg}`, '_blank');
+}
+
+document.getElementById('modal-redeem-btn').addEventListener('click', () => {
+  if (modalIndex < 0) return;
+  if (redeemed[modalIndex]) return;
+  redeemed[modalIndex] = true;
+  saveState(redeemed);
+  launchPetals(COUPONS[modalIndex].accent);
+  document.getElementById('redeemed-badge-wrap').innerHTML = '<div class="redeemed-badge">✓ Redeemed!</div>';
+  document.getElementById('modal-redeem-btn').textContent = 'Redeemed ✓';
+  document.getElementById('modal-redeem-btn').disabled = true;
+  document.getElementById('modal-wa-btn').classList.remove('hidden');
+  setWaBtn(modalIndex);
+  renderGrid();
+});
+
+// Try your luck
+(function() {
+  const btn = document.getElementById('luck-btn');
+  if (!btn) return;
+  btn.addEventListener('click', () => {
+    const available = redeemed.map((used,idx) => used ? -1 : idx).filter(idx => idx >= 0);
+    if (available.length === 0) { btn.textContent = 'All done — nothing left to try!'; btn.disabled = true; return; }
+    btn.textContent = 'Picking something cute...';
+    setTimeout(() => { btn.textContent = '✨ Try your luck'; openModal(available[Math.floor(Math.random() * available.length)]); }, 900);
+  });
+})();
+
+renderGrid();
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal-overlay').addEventListener('click', e => { if (e.target === document.getElementById('modal-overlay')) closeModal(); });
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); modalIndex = -1; }
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter;
+    renderGrid();
+  });
+});
+
+function updateStats() {
+  const r = redeemed.filter(Boolean).length;
+  const left = 27 - r;
+  document.getElementById('redeemed-count').textContent = r;
+  document.getElementById('left-count').textContent = left;
+  const fill = document.getElementById('ring-fill');
+  const offset = CIRCUMFERENCE * r / 27;
+  fill.style.strokeDashoffset = CIRCUMFERENCE - offset;
+}
+
+// ── PETALS / CONFETTI ──
+function launchPetals(accent) {
+  const shapes = ['🌸','🌺','💮','✨','🌼'];
+  const colors = [accent,'#c0485a','#f9a825','#e8a0b0','#fff'];
+  for (let i = 0; i < 44; i++) {
+    if (Math.random() < 0.4) {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      const size = 6 + Math.random() * 8;
+      el.style.cssText = `left:${20+Math.random()*60}vw;top:35vh;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()<.5?'50%':'3px'};animation-delay:${Math.random()*.5}s;animation-duration:${1.0+Math.random()*.8}s`;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    } else {
+      const el = document.createElement('div');
+      el.style.cssText = `position:fixed;pointer-events:none;z-index:300;font-size:${14+Math.random()*10}px;left:${20+Math.random()*60}vw;top:35vh;animation:confetti-fall ${1.0+Math.random()*.8}s ease-in forwards;animation-delay:${Math.random()*.4}s`;
+      el.textContent = shapes[Math.floor(Math.random()*shapes.length)];
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }
+  }
+}
+
+// ── FLOATING PETALS canvas ──
+(function() {
+  const canvas = document.getElementById('petal-canvas');
+  const ctx = canvas.getContext('2d');
+  let petals = []; let W, H;
+  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const PETAL_COUNT = 18;
+  for (let i = 0; i < PETAL_COUNT; i++) {
+    petals.push({ x:Math.random()*window.innerWidth, y:Math.random()*-400-40, r:4+Math.random()*6, vx:Math.random()-.5+.6, vy:.4+Math.random()*.7, rot:Math.random()*360, rotv:Math.random()-.5+1.5, alpha:.3+Math.random()*.5, color:['#e8a0b0','#f2c2c8','#c0485a','#f9dde0'][Math.floor(Math.random()*4)] });
+  }
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    petals.forEach(p => {
+      ctx.save(); ctx.globalAlpha = p.alpha;
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI/180);
+      ctx.beginPath();
+      ctx.moveTo(0,-p.r); ctx.bezierCurveTo(p.r,-p.r,p.r,p.r,0,p.r); ctx.bezierCurveTo(-p.r,p.r,-p.r,-p.r,0,-p.r);
+      ctx.fillStyle = p.color; ctx.fill(); ctx.restore();
+      p.x += p.vx; p.y += p.vy; p.rot += p.rotv;
+      if (p.y > H + 20) { p.y = -30; p.x = Math.random() * W; }
+    });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── DARK MODE ──
+(function(){
+  const btn = document.querySelector('[data-theme-toggle]');
+  const html = document.documentElement;
+  const dark = matchMedia('(prefers-color-scheme: dark)').matches;
+  html.setAttribute('data-theme', dark ? 'dark' : 'light');
+  btn.textContent = dark ? '☀️' : '🌙';
+  btn.addEventListener('click', () => {
+    const d = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', d ? 'light' : 'dark');
+    btn.textContent = d ? '🌙' : '☀️';
+  });
+})();
+
+renderGrid();
+</script>
+</body>
+</html>
